@@ -11,6 +11,7 @@ import com.dylibso.chicory.wasm.types.Instruction;
 import com.dylibso.chicory.wasm.types.OpCode;
 import java.util.Deque;
 import jdk.incubator.vector.LongVector;
+import jdk.incubator.vector.VectorOperators;
 
 public final class SimdInterpreterMachine extends InterpreterMachine {
 
@@ -75,10 +76,21 @@ public final class SimdInterpreterMachine extends InterpreterMachine {
             case OpCode.F32x4_CONVERT_I32x4_U:
                 F32x4_CONVERT_I32x4_U(stack);
                 break;
+            case OpCode.I8x16_ABS:
+                I8x16_ABS(stack);
             default:
                 super.evalDefault(stack, instance, callStack, instruction, operands);
                 break;
         }
+    }
+
+    private void I8x16_ABS(MStack stack) {
+        var offset = stack.size() - 2;
+        var bytes = LongVector.fromArray(LongVector.SPECIES_128, stack.array(), offset)
+                .reinterpretAsBytes();
+        var res = bytes.lanewise(VectorOperators.ABS).toLongArray();
+
+        System.arraycopy(res, 0, stack.array(), offset, 2);
     }
 
     private static void V128_CONST(MStack stack, Operands operands) {

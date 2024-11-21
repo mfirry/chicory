@@ -1214,6 +1214,10 @@ final class Validator {
                         pushVal(ValueType.I32);
                         break;
                     }
+                case V128_AND:
+                case V128_ANDNOT:
+                case V128_OR:
+                case V128_XOR:
                 case I8x16_EQ:
                 case I8x16_SUB:
                 case I8x16_ADD:
@@ -1229,6 +1233,7 @@ final class Validator {
                 case F32x4_ABS:
                 case I32x4_TRUNC_SAT_F32X4_S:
                 case F32x4_CONVERT_I32x4_U:
+                case I8x16_ABS:
                 case V128_NOT:
                     {
                         popVal(ValueType.V128);
