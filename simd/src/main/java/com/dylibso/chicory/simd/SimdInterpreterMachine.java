@@ -228,8 +228,25 @@ public final class SimdInterpreterMachine extends InterpreterMachine {
         var x1Hi = stack.pop();
         var x1Lo = stack.pop();
         // v128.or(v128.and(v1, c), v128.and(v2, v128.not(c)))
-        stack.push((x1Lo & cLo) | (x2Lo & (cLo ^ 0xFFFFFFFFFFFFFFFFL)));
-        stack.push((x1Hi & cHi) | (x2Hi & (cHi ^ 0xFFFFFFFFFFFFFFFFL)));
+
+        var cHiVec = LongVector.broadcast(LongVector.SPECIES_128, cHi);
+        var cLoVec = LongVector.broadcast(LongVector.SPECIES_128, cLo);
+        var notCHiVec = LongVector.broadcast(LongVector.SPECIES_128, cHi).not();
+        var notCLoVec = LongVector.broadcast(LongVector.SPECIES_128, cLo).not();
+
+        var x2HiVec = LongVector.broadcast(LongVector.SPECIES_128, x2Hi);
+        var x2LoVec = LongVector.broadcast(LongVector.SPECIES_128, x2Lo);
+        var x1HiVec = LongVector.broadcast(LongVector.SPECIES_128, x1Hi);
+        var x1LoVec = LongVector.broadcast(LongVector.SPECIES_128, x1Lo);
+
+        var resultLoVec = x1LoVec.and(cLoVec).or(x2LoVec.and(notCLoVec));
+        var resultHiVec = x1HiVec.and(cHiVec).or(x2HiVec.and(notCHiVec));
+
+        long resultLo = resultLoVec.lane(0);
+        long resultHi = resultHiVec.lane(0);
+
+        stack.push(resultLo);
+        stack.push(resultHi);
     }
 
     private static void F32x4_MUL(MStack stack) {
