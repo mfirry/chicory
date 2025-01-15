@@ -1953,8 +1953,11 @@ public final class SimdInterpreterMachine extends InterpreterMachine {
         var vHigh = stack.pop();
         var vLow = stack.pop();
 
-        // TODO: check the spec!
-        if (vLow != 0L || vHigh != 0L) {
+        var b =
+                LongVector.fromArray(LongVector.SPECIES_128, new long[] {vLow, vHigh}, 0)
+                        .compare(VectorOperators.NE, 0)
+                        .anyTrue();
+        if (b) {
             stack.push(BitOps.TRUE);
         } else {
             stack.push(BitOps.FALSE);
